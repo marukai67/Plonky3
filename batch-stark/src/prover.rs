@@ -626,6 +626,18 @@ where
                 .collect()
         })
         .collect();
+    let packed_perm_challenges = permutation_challenges
+        .iter()
+        .map(|p_c| PackedChallenge::<SC>::from(*p_c))
+        .collect::<Vec<_>>();
+    let packed_lookup_data = lookup_data
+        .iter()
+        .map(|ld| LookupData {
+            name: ld.name.clone(),
+            aux_idx: ld.aux_idx,
+            expected_cumulated: ld.expected_cumulated.into(),
+        })
+        .collect::<Vec<_>>();
     (0..quotient_size)
         .into_par_iter()
         .step_by(PackedVal::<SC>::WIDTH)
@@ -693,10 +705,6 @@ where
                 accumulator,
                 constraint_index: 0,
             };
-            let packed_perm_challenges = permutation_challenges
-                .iter()
-                .map(|p_c| PackedChallenge::<SC>::from(*p_c))
-                .collect::<Vec<_>>();
 
             let mut folder = ProverConstraintFolderWithLookups {
                 inner: inner_folder,
@@ -707,15 +715,7 @@ where
                 air,
                 &mut folder,
                 lookups,
-                lookup_data
-                    .iter()
-                    .map(|ld| LookupData {
-                        name: ld.name.clone(),
-                        aux_idx: ld.aux_idx,
-                        expected_cumulated: ld.expected_cumulated.into(),
-                    })
-                    .collect::<Vec<_>>()
-                    .as_slice(),
+                packed_lookup_data.as_slice(),
                 lookup_gadget,
             );
 
