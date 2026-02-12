@@ -49,7 +49,6 @@
 //!
 //! The output buffer must always be of length `2^n` for `n` variables.
 
-use alloc::vec;
 use alloc::vec::Vec;
 
 use p3_field::{
@@ -1011,6 +1010,8 @@ fn add_or_set<F: Field, const INITIALIZED: bool>(out: &mut [F], evaluations: &[F
 
 #[cfg(test)]
 mod tests {
+    use alloc::vec;
+    
     use p3_baby_bear::BabyBear;
     use p3_field::extension::BinomialExtensionField;
     use p3_field::{PrimeCharacteristicRing, PrimeField64};
