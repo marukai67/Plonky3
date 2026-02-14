@@ -49,7 +49,6 @@
 //!
 //! The output buffer must always be of length `2^n` for `n` variables.
 
-use alloc::vec;
 use alloc::vec::Vec;
 
 use p3_field::{
@@ -164,18 +163,20 @@ where
         //
         // Each existing row generates two new rows: one for x_j = 0, one for x_j = 1.
         for idx in 0..stride {
+            let row_base = idx * width;
+            let next_row_base = (idx + stride) * width;
             // Process each column (each point in the batch) for the current row `idx`.
             for (col, &eval_point) in eval_row.iter().enumerate().take(width) {
                 // Read the current value directly from the buffer.
-                let val = buffer.values[idx * width + col].clone();
+                let val = buffer.values[row_base + col].clone();
 
                 // Compute the two new values for the next level of the hypercube.
                 let scaled_val = val.clone() * eval_point;
                 let new_val = val - scaled_val.clone();
 
                 // Write the results back in-place.
-                buffer.values[idx * width + col] = new_val;
-                buffer.values[(idx + stride) * width + col] = scaled_val;
+                buffer.values[row_base + col] = new_val;
+                buffer.values[next_row_base + col] = scaled_val;
             }
         }
     }
@@ -1011,6 +1012,8 @@ fn add_or_set<F: Field, const INITIALIZED: bool>(out: &mut [F], evaluations: &[F
 
 #[cfg(test)]
 mod tests {
+    use alloc::vec;
+    
     use p3_baby_bear::BabyBear;
     use p3_field::extension::BinomialExtensionField;
     use p3_field::{PrimeCharacteristicRing, PrimeField64};
